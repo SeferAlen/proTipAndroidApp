@@ -9,16 +9,19 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.protip.MainActivity;
 import com.example.protip.R;
 
 public class ProTipDialog {
 
     public static void openDialog(final String title, final String text, final DialogType dialogType, AppCompatActivity activity) {
+        if (title == null) throw new NullPointerException("title must not be null");
+        if (text == null) throw new NullPointerException("text must not be null");
+        if (dialogType == null) throw new NullPointerException("dialogType must not be null");
+        if (activity == null) throw new NullPointerException("activity must not be null");
 
+        final ViewGroup viewGroup = activity.findViewById(android.R.id.content);
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
-        ViewGroup viewGroup = activity.findViewById(android.R.id.content);
         View dialogView;
         if (dialogType.equals(DialogType.INFO)) {
             dialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_info, viewGroup, false);
