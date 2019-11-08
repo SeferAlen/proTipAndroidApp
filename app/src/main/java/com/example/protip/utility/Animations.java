@@ -18,7 +18,7 @@ public class Animations {
     public static void btnAnimation(final View view) {
         if (view == null) throw new NullPointerException("View must not be null");
 
-        Animator scale = ObjectAnimator.ofPropertyValuesHolder(
+        final Animator scale = ObjectAnimator.ofPropertyValuesHolder(
                 view,
                 PropertyValuesHolder.ofFloat(View.SCALE_X, 1, 1.12f, 1),
                 PropertyValuesHolder.ofFloat(View.SCALE_Y, 1, 1.12f, 1)

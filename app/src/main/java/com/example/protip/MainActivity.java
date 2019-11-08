@@ -2,11 +2,14 @@ package com.example.protip;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.protip.activity.TipActivity;
 import com.example.protip.asyncTasks.AsyncLoginAPIResponse;
@@ -28,14 +31,17 @@ public class MainActivity extends AppCompatActivity implements AsyncLoginAPIResp
     private static final int HTTP_STATUS_NOT_FOUND = HttpsURLConnection.HTTP_NOT_FOUND;
     private static final int HTTP_STATUS_INTERNAL_ERROR = HttpsURLConnection.HTTP_INTERNAL_ERROR;
     private static final DialogType INFO = DialogType.INFO;
+    private static final DialogType ERROR = DialogType.ERROR;
     private static final String USERNAME = "username";
     private static final String PASSWORD = "password";
     private static final String WARNING_TITLE = "Warning";
     private static final String EMPTY_USERNAME_PASSWORD_TEXT = "Username and Password must not be empty";
     private static final String INVALID_USERNAME_TITLE = "Login Failed";
     private static final String INVALID_PASSWORD_TITLE = "Login Failed";
-    private static final String NETWORK_ERROR = "Network error";
-    private static final String APPLICATION_ERROR = "Application error";
+    private static final String NETWORK_ERROR_TITLE = "Network error";
+    private static final String NETWORK_ERROR = "Connecting with server error has occurred";
+    private static final String NETWORK_ERROR_NO_INTERNET = "Check internet connection";
+    private static final String APPLICATION_ERROR_TITLE = "Application error";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,8 +66,12 @@ public class MainActivity extends AppCompatActivity implements AsyncLoginAPIResp
                 if (username.isEmpty() || password.isEmpty()) {
                     ProTipDialog.openDialog(WARNING_TITLE, EMPTY_USERNAME_PASSWORD_TEXT, INFO, MainActivity.this);
                 } else {
-                    sendLoginPostRequest(username, password);
-                    loginButton.setEnabled(false);
+                    if (isNetworkConnected()) {
+                        sendLoginPostRequest(username, password);
+                        loginButton.setEnabled(false);
+                    } else {
+                        ProTipDialog.openDialog(NETWORK_ERROR_TITLE, NETWORK_ERROR_NO_INTERNET, ERROR, MainActivity.this);
+                    }
                 }
             }
         });
@@ -98,22 +108,35 @@ public class MainActivity extends AppCompatActivity implements AsyncLoginAPIResp
                 openTipActivity();
                 break;
             case HTTP_STATUS_BAD_REQUEST:
-                ProTipDialog.openDialog(INVALID_USERNAME_TITLE, apiResponse.getResponse(), DialogType.INFO, this);
+                ProTipDialog.openDialog(INVALID_USERNAME_TITLE, apiResponse.getResponse(), INFO, this);
                 break;
             case HTTP_STATUS_UNAUTHORIZED:
-                ProTipDialog.openDialog(INVALID_PASSWORD_TITLE, apiResponse.getResponse(), DialogType.INFO, this);
+                ProTipDialog.openDialog(INVALID_PASSWORD_TITLE, apiResponse.getResponse(), INFO, this);
                 break;
             case HTTP_STATUS_NOT_FOUND:
-                ProTipDialog.openDialog(NETWORK_ERROR, apiResponse.getResponse(), DialogType.ERROR, this);
+                ProTipDialog.openDialog(NETWORK_ERROR_TITLE, apiResponse.getResponse(), ERROR, this);
                 break;
             case HTTP_STATUS_INTERNAL_ERROR:
-                ProTipDialog.openDialog(APPLICATION_ERROR, apiResponse.getResponse(), DialogType.ERROR, this);
+                ProTipDialog.openDialog(APPLICATION_ERROR_TITLE, apiResponse.getResponse(), ERROR, this);
                 break;
         }
     }
 
+    /**
+     * Method for opening TipActivity
+     */
     private void openTipActivity() {
         Intent intent = new Intent(this, TipActivity.class);
         startActivity(intent);
+    }
+
+    /**
+     * Method for checking network connection status
+     * @return {@link APIResponse} apiResponse object containing data returned from proTipServices API
+     */
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
 }

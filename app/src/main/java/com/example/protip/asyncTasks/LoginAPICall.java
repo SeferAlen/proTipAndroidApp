@@ -1,6 +1,7 @@
 package com.example.protip.asyncTasks;
 
 import android.os.AsyncTask;
+import android.widget.Toast;
 
 import com.example.protip.model.APIResponse;
 import com.example.protip.utility.InputStreamResponse;
@@ -76,7 +77,8 @@ public class LoginAPICall extends AsyncTask<String, Void, APIResponse> {
             httpURLConnection.setDoOutput(true);
             httpURLConnection.connect();
 
-            final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(httpURLConnection.getOutputStream()));
+            final BufferedWriter writer =
+                    new BufferedWriter(new OutputStreamWriter(httpURLConnection.getOutputStream()));
             writer.write(jsonData.toString());
             writer.flush();
             writer.close();
@@ -138,7 +140,8 @@ public class LoginAPICall extends AsyncTask<String, Void, APIResponse> {
     private InputStreamResponse getResponse(final InputStream inputStream) {
 
         try{
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 8);
+            final BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 8);
             final StringBuilder stringBuilder = new StringBuilder();
             String line;
 
@@ -148,7 +151,7 @@ public class LoginAPICall extends AsyncTask<String, Void, APIResponse> {
 
             inputStream.close();
 
-            String response = stringBuilder.toString();
+            final String response = stringBuilder.toString();
             jsonObject = new JSONObject(response);
 
             return InputStreamResponse.OK;

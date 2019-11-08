@@ -11,18 +11,32 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.protip.R;
 
+/**
+ * Class used to open dialog windows across app
+ */
 public class ProTipDialog {
 
-    public static void openDialog(final String title, final String text, final DialogType dialogType, AppCompatActivity activity) {
+    /**
+     * Static function which opens dialog window
+     *
+     * @param title {@link String} the title
+     * @param text {@link String} the text
+     * @param dialogType {@link DialogType} the type of dilaog to be opened
+     * @param activity {@link AppCompatActivity} the activity in which is dialog being open
+     */
+    public static void openDialog(final String title,
+                                  final String text,
+                                  final DialogType dialogType,
+                                  final AppCompatActivity activity) {
         if (title == null) throw new NullPointerException("title must not be null");
         if (text == null) throw new NullPointerException("text must not be null");
         if (dialogType == null) throw new NullPointerException("dialogType must not be null");
         if (activity == null) throw new NullPointerException("activity must not be null");
 
         final ViewGroup viewGroup = activity.findViewById(android.R.id.content);
+        final View dialogView;
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
-        View dialogView;
         if (dialogType.equals(DialogType.INFO)) {
             dialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_info, viewGroup, false);
         } else if (dialogType.equals(DialogType.ERROR)) {
