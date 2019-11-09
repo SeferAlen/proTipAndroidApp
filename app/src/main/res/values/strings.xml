@@ -1,4 +1,5 @@
 <resources>
+    <string name="test">Test</string>
     <string name="app_name">proTip</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
@@ -6,5 +7,6 @@
     <string name="version">v.1.0</string>
     <string name="register">Register at www.protip.net</string>
     <string name="title">Info</string>
+    <string name="proTipUser">proTipUser</string>
     <string name="ok">OK</string>
 </resources>
