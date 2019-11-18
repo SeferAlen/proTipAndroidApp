@@ -1,8 +1,8 @@
 package com.example.protip.asyncTasks;
 
-import com.example.protip.model.APIResponse;
+import com.example.protip.model.APIResponseLogin;
 
 public interface AsyncLoginAPIResponse {
 
-    void processFinished(final APIResponse apiResponse);
+    void processFinished(final APIResponseLogin apiResponseLogin);
 }

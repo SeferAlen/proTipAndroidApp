@@ -1,9 +1,9 @@
 package com.example.protip.model;
 
 /**
- * Class representing data send by proTipServices API
+ * Class representing data send by proTipServices API when login is performed
  */
-public class APIResponse {
+public class APIResponseLogin {
 
     private String response;
     private int responseCode;
@@ -14,7 +14,7 @@ public class APIResponse {
      * @param response     the response
      * @param responseCode the response code
      */
-    public APIResponse(String response, int responseCode) {
+    public APIResponseLogin(String response, int responseCode) {
         this.response = response;
         this.responseCode = responseCode;
     }

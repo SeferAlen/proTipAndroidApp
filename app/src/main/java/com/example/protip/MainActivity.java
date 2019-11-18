@@ -4,18 +4,18 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.example.protip.activity.TipActivity;
 import com.example.protip.asyncTasks.AsyncLoginAPIResponse;
 import com.example.protip.asyncTasks.LoginAPICall;
 import com.example.protip.config.ProTipApplicationConfig;
-import com.example.protip.model.APIResponse;
+import com.example.protip.model.APIResponseLogin;
 import com.example.protip.utility.Animations;
 import com.example.protip.utility.DialogType;
 import com.example.protip.utility.ProTipDialog;
@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements AsyncLoginAPIResp
     private static final DialogType ERROR = DialogType.ERROR;
     private static final String USERNAME = "username";
     private static final String PASSWORD = "password";
+    private static final String TOKEN = "token";
     private static final String WARNING_TITLE = "Warning";
     private static final String EMPTY_USERNAME_PASSWORD_TEXT = "Username and Password must not be empty";
     private static final String INVALID_USERNAME_TITLE = "Login Failed";
@@ -43,13 +44,15 @@ public class MainActivity extends AppCompatActivity implements AsyncLoginAPIResp
     private static final String NETWORK_ERROR_NO_INTERNET = "Check internet connection";
     private static final String APPLICATION_ERROR_TITLE = "Application error";
 
+    Button loginButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final Button loginButton = (Button) findViewById(R.id.buttonLogin);
+        loginButton = (Button) findViewById(R.id.buttonLogin);
 
         /**
          * Login button click listener for sending POST request and opening Dialog window
@@ -90,34 +93,35 @@ public class MainActivity extends AppCompatActivity implements AsyncLoginAPIResp
         postData.put(PASSWORD, password);
 
         final LoginAPICall loginAPICall = new LoginAPICall(postData, this);
-        loginAPICall.execute(ProTipApplicationConfig.getProTipServicesURL());
+        loginAPICall.execute(ProTipApplicationConfig.getProTipServicesTestURL());
     }
 
     /**
      * Method for processing response from proTipServices API after login try
-     * @param apiResponse {@link APIResponse} apiResponse object containing data returned from proTipServices API
+     * @param apiResponseLogin {@link APIResponseLogin} apiResponseLogin object containing data returned from proTipServices API
      */
     @Override
-    public void processFinished(final APIResponse apiResponse){
+    public void processFinished(final APIResponseLogin apiResponseLogin){
         final Button loginButton = (Button) findViewById(R.id.buttonLogin);
 
         loginButton.setEnabled(true);
 
-        switch (apiResponse.getResponseCode()) {
+        switch (apiResponseLogin.getResponseCode()) {
             case HTTP_STATUS_OK:
+                setToken(apiResponseLogin.getResponse());
                 openTipActivity();
                 break;
             case HTTP_STATUS_BAD_REQUEST:
-                ProTipDialog.openDialog(INVALID_USERNAME_TITLE, apiResponse.getResponse(), INFO, this);
+                ProTipDialog.openDialog(INVALID_USERNAME_TITLE, apiResponseLogin.getResponse(), INFO, this);
                 break;
             case HTTP_STATUS_UNAUTHORIZED:
-                ProTipDialog.openDialog(INVALID_PASSWORD_TITLE, apiResponse.getResponse(), INFO, this);
+                ProTipDialog.openDialog(INVALID_PASSWORD_TITLE, apiResponseLogin.getResponse(), INFO, this);
                 break;
             case HTTP_STATUS_NOT_FOUND:
-                ProTipDialog.openDialog(NETWORK_ERROR_TITLE, apiResponse.getResponse(), ERROR, this);
+                ProTipDialog.openDialog(NETWORK_ERROR_TITLE, apiResponseLogin.getResponse(), ERROR, this);
                 break;
             case HTTP_STATUS_INTERNAL_ERROR:
-                ProTipDialog.openDialog(APPLICATION_ERROR_TITLE, apiResponse.getResponse(), ERROR, this);
+                ProTipDialog.openDialog(APPLICATION_ERROR_TITLE, apiResponseLogin.getResponse(), ERROR, this);
                 break;
         }
     }
@@ -132,11 +136,18 @@ public class MainActivity extends AppCompatActivity implements AsyncLoginAPIResp
 
     /**
      * Method for checking network connection status
-     * @return {@link APIResponse} apiResponse object containing data returned from proTipServices API
+     * @return {@link APIResponseLogin} apiResponse object containing data returned from proTipServices API
      */
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
         return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
+    }
+
+    private void setToken(final String token) {
+
+        final SharedPreferences.Editor editor = getSharedPreferences(ProTipApplicationConfig.getPreferencesName(), MODE_PRIVATE).edit();
+        editor.putString(TOKEN, token);
+        editor.apply();
     }
 }

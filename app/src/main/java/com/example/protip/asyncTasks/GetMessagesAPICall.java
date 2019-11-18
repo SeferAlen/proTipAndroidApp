@@ -3,6 +3,8 @@ package com.example.protip.asyncTasks;
 import android.os.AsyncTask;
 
 import com.example.protip.model.APIResponseLogin;
+import com.example.protip.model.APIResponseMessages;
+import com.example.protip.model.ReceivedMessages;
 import com.example.protip.utility.InputStreamResponse;
 
 import org.json.JSONException;
@@ -16,14 +18,16 @@ import java.io.OutputStreamWriter;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
 /**
- * Class extending AsyncTask for making HTTP request to API for login
+ * Class extending AsyncTask for making HTTP request to API for getting messages
  */
-public class LoginAPICall extends AsyncTask<String, Void, APIResponseLogin> {
+public class GetMessagesAPICall extends AsyncTask<String, Void, APIResponseMessages> {
     private static final int HTTP_STATUS_OK = HttpsURLConnection.HTTP_OK;
     private static final int HTTP_STATUS_BAD_REQUEST = HttpsURLConnection.HTTP_BAD_REQUEST;
     private static final int HTTP_STATUS_UNAUTHORIZED = HttpsURLConnection.HTTP_UNAUTHORIZED;
@@ -39,14 +43,14 @@ public class LoginAPICall extends AsyncTask<String, Void, APIResponseLogin> {
     private static final String TOKEN = "token";
     private static final String MESSAGE = "message";
 
-    private AsyncLoginAPIResponse delegate;
+    private AsyncGetMessagesAPIResponse delegate;
     private HashMap<String, String> postDataParams;
     private int responseCode;
     private String message;
     private JSONObject jsonObject;;
     private InputStreamResponse inputStreamResponse = InputStreamResponse.UNKNOWN;
 
-    public LoginAPICall(final HashMap<String, String> postDataParams, final AsyncLoginAPIResponse delegate){
+    public GetMessagesAPICall(final HashMap<String, String> postDataParams, final AsyncGetMessagesAPIResponse delegate){
         this.postDataParams = postDataParams;
         this.delegate = delegate;
     }
@@ -58,9 +62,10 @@ public class LoginAPICall extends AsyncTask<String, Void, APIResponseLogin> {
      * @return {@link APIResponseLogin} representing status of reading input status
      */
     @Override
-    protected APIResponseLogin doInBackground(String... params) {
+    protected APIResponseMessages doInBackground(String... params) {
 
         final String url = params[0];
+        final List<ReceivedMessages> emptyList = new ArrayList<ReceivedMessages>();
 
         try {
             final InputStream inputStream;
@@ -99,12 +104,12 @@ public class LoginAPICall extends AsyncTask<String, Void, APIResponseLogin> {
             }
 
             if (inputStreamResponse.equals(InputStreamResponse.ERROR)) {
-                return new APIResponseLogin(ERROR, HTTP_STATUS_INTERNAL_ERROR);
+                return new APIResponseMessages(emptyList, HTTP_STATUS_INTERNAL_ERROR);
             }
         } catch (final ConnectException r) {
-            return new APIResponseLogin(NETWORK_ERROR, HTTP_STATUS_NOT_FOUND);
+            return new APIResponseMessages(emptyList, HTTP_STATUS_NOT_FOUND);
         } catch (final Exception e) {
-            return new APIResponseLogin(ERROR, HTTP_STATUS_INTERNAL_ERROR);
+            return new APIResponseMessages(emptyList, HTTP_STATUS_INTERNAL_ERROR);
         }
 
         try {
@@ -114,19 +119,19 @@ public class LoginAPICall extends AsyncTask<String, Void, APIResponseLogin> {
                 message = jsonObject.getString(MESSAGE);
             }
         } catch (final JSONException e) {
-            return new APIResponseLogin(ERROR, HttpsURLConnection.HTTP_INTERNAL_ERROR);
+            return new APIResponseMessages(emptyList, HttpsURLConnection.HTTP_INTERNAL_ERROR);
         }
-        return new APIResponseLogin(message, responseCode);
+        return new APIResponseMessages(emptyList, responseCode);
     }
 
     /**
      * Method after execute is over
      *
-     * @param apiResponseLogin {@link APIResponseLogin} apiResponseLogin representing data sent by API
+     * @param apiResponseMessages {@link APIResponseMessages} apiResponseLogin apiResponseMessages data sent by API
      */
     @Override
-    protected void onPostExecute(final APIResponseLogin apiResponseLogin) {
-        delegate.processFinished(apiResponseLogin);
+    protected void onPostExecute(final APIResponseMessages apiResponseMessages) {
+        delegate.processFinished(apiResponseMessages);
     }
 
     /**
